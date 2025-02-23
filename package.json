@@ -1,0 +1,28 @@
+{
+  "name": "rapyd-ts-sdk",
+  "version": "0.0.0-development",
+  "description": "",
+  "homepage": "https://github.com/stawuah/rapyd-ts-sdk#readme",
+  "bugs": {
+    "url": "https://github.com/stawuah/rapyd-ts-sdk/issues"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/stawuah/rapyd-ts-sdk.git"
+  },
+  "license": "ISC",
+  "author": "",
+  "type": "commonjs",
+  "main": "index.js",
+  "scripts": {
+    "build": "tsc",
+    "semantic-release": "semantic-release"
+  },
+  "devDependencies": {
+    "semantic-release": "^24.2.3",
+    "typescript": "^5.7.3"
+  },
+  "files": [
+    "dist", "README.md"
+  ]
+}
