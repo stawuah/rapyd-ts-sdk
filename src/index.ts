@@ -1,19 +1,21 @@
-// src/index.ts
 import crypto from 'crypto';
-import axios, { AxiosInstance } from "axios";
+import axios, { AxiosInstance } from 'axios';
 
+import { PaymentMethodsService } from './services';
 
 export class RapydClient {
-    private accessKey: string;
-    private secretKey: string;
-    private baseURL: string;
-    private client: AxiosInstance;
+    protected accessKey: string;
+    protected secretKey: string;
+    protected baseURL: string;
+    protected client: AxiosInstance;
+    
+    private payments: PaymentMethodsService;
 
     constructor(accessKey: string, secretKey: string, baseURL = 'https://api.rapyd.net') {
         this.accessKey = accessKey;
         this.secretKey = secretKey;
         this.baseURL = baseURL;
-        
+
         this.client = axios.create({
             baseURL: this.baseURL,
             headers: {
@@ -21,17 +23,19 @@ export class RapydClient {
             }
         });
 
-        // Add request interceptor for signing requests
         this.client.interceptors.request.use(this.signRequest.bind(this));
+
+        // Initialize services
+        this.payments = new PaymentMethodsService(accessKey, secretKey, baseURL);
     }
 
-    private generateSalt(length: number = 8): string {
+    protected generateSalt(length: number = 8): string {
         return crypto.randomBytes(Math.ceil(length / 2))
             .toString('hex')
             .slice(0, length);
     }
 
-    private signRequest(config: any) {
+    protected signRequest(config: any) {
         const salt = this.generateSalt();
         const timestamp = Math.floor(Date.now() / 1000);
         const httpMethod = config.method?.toUpperCase() || 'GET';
@@ -52,62 +56,43 @@ export class RapydClient {
         return config;
     }
 
+    // Getter method to avoid initialization issues
+    public getFieldRequirements(paymentMethodType: string) {
+        return this.payments.getFieldRequirements(paymentMethodType);
+    }
+}
+
+
+
+ // public createPayment = this.payments.createPayment.bind(this.payments);
+    // public createWallet = this.wallets.createWallet.bind(this.wallets);
+    // public getWalletBalance = this.wallets.getWalletBalance.bind(this.wallets);
+    // public createPayout = this.payouts.createPayout.bind(this.payouts);
+    // public createVirtualAccount = this.virtualAccounts.createVirtualAccount.bind(this.virtualAccounts);
     // Payment Methods
-    public async listPaymentMethods(country: string, currency: string) {
-        return this.client.get(`/v1/payment_methods/country?country=${country}&currency=${currency}`);
-    }
+    // public async listPaymentMethods(country: string, currency: string) {
+    //     return this.client.get(`/v1/payment_methods/country?country=${country}&currency=${currency}`);
+    // }
 
-    public async createPayment(data: PaymentRequest) {
-        return this.client.post('/v1/payments', data);
-    }
+    // public async createPayment(data: PaymentRequest) {
+    //     return this.client.post('/v1/payments', data);
+    // }
 
-    // Wallets
-    public async createWallet(data: WalletRequest) {
-        return this.client.post('/v1/user/wallets', data);
-    }
+    // // Wallets
+    // public async createWallet(data: WalletRequest) {
+    //     return this.client.post('/v1/user/wallets', data);
+    // }
 
-    public async getWalletBalance(walletId: string) {
-        return this.client.get(`/v1/user/wallets/${walletId}`);
-    }
+    // public async getWalletBalance(walletId: string) {
+    //     return this.client.get(`/v1/user/wallets/${walletId}`);
+    // }
 
-    // Payouts
-    public async createPayout(data: PayoutRequest) {
-        return this.client.post('/v1/payouts', data);
-    }
+    // // Payouts
+    // public async createPayout(data: PayoutRequest) {
+    //     return this.client.post('/v1/payouts', data);
+    // }
 
-    // Virtual Accounts
-    public async createVirtualAccount(data: VirtualAccountRequest) {
-        return this.client.post('/v1/virtual_accounts', data);
-    }
-}
-
-// Types
-export interface PaymentRequest {
-    amount: number;
-    currency: string;
-    payment_method: string;
-    // Add other payment fields
-}
-
-export interface WalletRequest {
-    first_name: string;
-    last_name: string;
-    email: string;
-    ewallet_reference_id: string;
-    // Add other wallet fields
-}
-
-export interface PayoutRequest {
-    beneficiary: string;
-    payout_method_type: string;
-    amount: number;
-    currency: string;
-    // Add other payout fields
-}
-
-export interface VirtualAccountRequest {
-    country: string;
-    currency: string;
-    description: string;
-    // Add other virtual account fields
-}
+    // // Virtual Accounts
+    // public async createVirtualAccount(data: VirtualAccountRequest) {
+    //     return this.client.post('/v1/virtual_accounts', data);
+    // }

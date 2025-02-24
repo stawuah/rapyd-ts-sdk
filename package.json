@@ -11,7 +11,12 @@
     "url": "git+https://github.com/stawuah/rapyd-ts-sdk.git"
   },
   "license": "ISC",
-  "author": "",
+  "author": "Awuah Stephen Nyameke",
+  "keywords": [
+    "rapyd",
+    "sdk",
+    "typescript"
+  ],
   "type": "module",
   "main": "./dist/index.js",
   "types": "dist/index.d.ts",
