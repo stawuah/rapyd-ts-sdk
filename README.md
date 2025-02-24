@@ -5,8 +5,6 @@
 
 A modern, fully-typed TypeScript SDK for the Rapyd payment platform API (unofficial).
 
-![npm](https://img.shields.io/npm/v/rapyd-typescript-sdk)
-![License](https://img.shields.io/npm/l/rapyd-typescript-sdk)
 ![TypeScript](https://img.shields.io/badge/TypeScript-4.5%2B-blue)
 
 ## Features
@@ -23,7 +21,7 @@ A modern, fully-typed TypeScript SDK for the Rapyd payment platform API (unoffic
 ## Installation
 
 ```bash
-npm install rapyd-typescript-sdk
+npm install rapyd-ts-sdk
 ```
 
 ## Quick Start
@@ -35,6 +33,12 @@ const client = new RapydClient(
     'your_access_key',
     'your_secret_key'
 );
+
+
+// Get payment method field requirements
+const fieldRequirements = await client.getFieldRequirements('us_debit_card'), //  bank_tranfer = us_ach_bank , etc ;
+console.log(fieldRequirements);
+
 
 // Create a payment
 const payment = await client.createPayment({
