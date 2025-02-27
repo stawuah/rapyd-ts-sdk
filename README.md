@@ -11,12 +11,17 @@ A modern, fully-typed TypeScript SDK for the Rapyd payment platform API (unoffic
 
 ✨ What makes this SDK special:
 
-- Full TypeScript support
-- Built-in request signing
-- Promise-based API
-- Comprehensive documentation
-- Built-in error handling
-- Complete test coverage
+Here’s your list with updated emojis:  
+
+🚀 Lightweight & Efficient – Optimized for performance with minimal dependencies.  
+📌 TypeScript-Powered – Enjoy strong typing, autocompletion, and better developer experience.  
+💳 Seamless Rapyd Integration** – Easily interact with Rapyd’s fintech APIs for payments, wallets, and more.  
+🔒 Built-in Request Signing – Secure HMAC authentication is handled automatically.  
+💡 Developer-Friendly – Clean, well-structured code with intuitive service methods.  
+🛠️ Extensible – Designed for easy customization and future enhancements.  
+📄 Detailed request and response typing**  
+
+Let me know if you'd like any tweaks! 🚀
 
 ## Installation
 
@@ -36,9 +41,12 @@ const client = new RapydClient(
 
 
 // Get payment method field requirements
-const fieldRequirements = await client.getFieldRequirements('us_debit_card'), //  bank_tranfer = us_ach_bank , etc ;
+const fieldRequirements = await client.PaymentMethodsService.getFieldRequirements('us_debit_card'), //  bank_tranfer = us_ach_bank , etc ;
 console.log(fieldRequirements);
 
+// Get payment methods by country
+const paymentMethods = await client.PaymentMethodsService.getPaymentMethodsByCountry('US');
+console.log(`Found ${paymentMethods.payment_methods.length} payment methods for ${paymentMethods.country}`);
 
 // Create a payment
 const payment = await client.createPayment({
@@ -124,13 +132,13 @@ try {
 
 ## Support
 
-- Issues: [GitHub Issues](https://github.com/yourusername/rapyd-typescript-sdk/issues)
-- Email: your.email@example.com
+- Issues: [GitHub Issues](https://github.com/stawuah/rapyd-ts-sdk/issues)
+- Email: nobudev20@gmail.com
 - Documentation: [Wiki](https://github.com/yourusername/rapyd-typescript-sdk/wiki)
 
 ## License
 
-MIT © [Your Name]
+MIT © [LICENSE](https://github.com/stawuah/rapyd-ts-sdk/blob/main/LICENSE)
 
 ---
-Built with ❤️ by [Your Name]
+Built with ❤️ by Awuah, Hunt

@@ -1,5 +1,5 @@
 import { RapydClient } from '../index';
-import { PaymentMethodFieldsResponse, RequiredField } from '../types/payment-methods';
+import { PaymentMethodFieldsResponse, PaymentMethodByCountryResponse, PaymentMethod, PaymentMethodsResponse,RequiredField } from '../types/payment-methods';
 
 export class PaymentMethodsService extends RapydClient {
     /**
@@ -64,5 +64,85 @@ export class PaymentMethodsService extends RapydClient {
             paymentOptions: data.payment_options,
             ...(expirationLimits && { expirationLimits })
         };
+    }
+    /**
+     * Fetches available payment methods for a specific country.
+     * @param {string} countryCode - The 2-letter country code (ISO 3166-1 alpha-2).
+     * @returns {Promise<PaymentMethodByCountryResponse>} - Payment methods response.
+     */
+    public async getPaymentMethodsByCountry(
+        countryCode: string
+    ): Promise<PaymentMethodByCountryResponse> {
+        try {
+            const response = await this.client.get<PaymentMethodsResponse>(
+                `/v1/payment_methods/countries/${countryCode}`
+            );
+
+            if (!response.data?.data || !Array.isArray(response.data.data)) {
+                console.error(`[PaymentMethodsService] Invalid response format for country: ${countryCode}`);
+                return { country: countryCode, payment_methods: [] }; // Return empty array instead of throwing
+            }
+
+            return {
+                country: countryCode,
+                payment_methods: response.data.data.map((method: PaymentMethod) => ({
+                    type: method.type,
+                    name: method.name,
+                    category: method.category,
+                    image: method.image,
+                    country: method.country,
+                    payment_flow_type: method.payment_flow_type,
+                    currencies: method.currencies || [],
+                    status: method.status,
+                    is_cancelable: method.is_cancelable,
+                    payment_options: method.payment_options,
+                    is_expirable: method.is_expirable,
+                    is_online: method.is_online,
+                    is_refundable: method.is_refundable,
+                    minimum_expiration_seconds: method.minimum_expiration_seconds,
+                    maximum_expiration_seconds: method.maximum_expiration_seconds,
+                    virtual_payment_method_type: method.virtual_payment_method_type,
+                    is_virtual: method.is_virtual,
+                    multiple_overage_allowed: method.multiple_overage_allowed,
+                    amount_range_per_currency: method.amount_range_per_currency,
+                    is_tokenizable: method.is_tokenizable,
+                    supported_digital_wallet_providers: method.supported_digital_wallet_providers || [],
+                    is_restricted: method.is_restricted,
+                    supports_subscription: method.supports_subscription,
+                    supports_installments: method.supports_installments || false,
+                })),
+            };
+        } catch (error: any) {
+            console.error(`[PaymentMethodsService] Error fetching payment methods: ${this.formatError(error)}`);
+            return { country: countryCode, payment_methods: [] }; // Return empty array to handle gracefully
+        }
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+    /**
+     * Formats error messages from Rapyd API or generic request failures.
+     * @param {any} error - Error object
+     * @returns {string} - Formatted error message
+     */
+    private formatError(error: any): string {
+        return error.response
+            ? `Rapyd API Error: ${error.response.data.status?.error_code} - ${error.response.data.status?.message}`
+            : `Unexpected error: ${error.message}`;
     }
 }
