@@ -9,9 +9,7 @@ A modern, fully-typed TypeScript SDK for the Rapyd payment platform API (unoffic
 
 ## Features
 
-✨ What makes this SDK special:
-
-Here’s your list with updated emojis:  
+✨ What makes this SDK special: 
 
 🚀 Lightweight & Efficient – Optimized for performance with minimal dependencies.  
 📌 TypeScript-Powered – Enjoy strong typing, autocompletion, and better developer experience.  
@@ -21,7 +19,6 @@ Here’s your list with updated emojis:
 🛠️ Extensible – Designed for easy customization and future enhancements.  
 📄 Detailed request and response typing**  
 
-Let me know if you'd like any tweaks! 🚀
 
 ## Installation
 
