@@ -21,6 +21,7 @@ export class RapydClient {
             headers: {
                 'Content-Type': 'application/json',
             }
+
         });
 
         this.client.interceptors.request.use(this.signRequest.bind(this));
@@ -31,6 +32,7 @@ export class RapydClient {
 
     protected generateSalt(length: number = 8): string {
         return crypto.randomBytes(Math.ceil(length / 2))
+
             .toString('hex')
             .slice(0, length);
     }
@@ -60,6 +62,12 @@ export class RapydClient {
     public getFieldRequirements(paymentMethodType: string) {
         return this.payments.getFieldRequirements(paymentMethodType);
     }
+
+    public getPaymentMethodsByCountry(countryCode: string) {
+        return this.payments.getPaymentMethodsByCountry(countryCode);
+    }
+
+
 }
 
 
