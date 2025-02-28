@@ -1,7 +1,8 @@
 import crypto from 'crypto';
 import axios, { AxiosInstance } from 'axios';
 
-import { PaymentMethodsService } from './services';
+import { PaymentMethodsService , PaymentService } from './services';
+import { CreatePaymentRequest } from './types/payment';
 
 export class RapydClient {
     protected accessKey: string;
@@ -10,6 +11,8 @@ export class RapydClient {
     protected client: AxiosInstance;
     
     private payments: PaymentMethodsService;
+    private payment : PaymentService
+    
 
     constructor(accessKey: string, secretKey: string, baseURL = 'https://api.rapyd.net') {
         this.accessKey = accessKey;
@@ -28,6 +31,7 @@ export class RapydClient {
 
         // Initialize services
         this.payments = new PaymentMethodsService(accessKey, secretKey, baseURL);
+        this.payment = new PaymentService(accessKey, secretKey, baseURL);
     }
 
     protected generateSalt(length: number = 8): string {
@@ -67,6 +71,9 @@ export class RapydClient {
         return this.payments.getPaymentMethodsByCountry(countryCode);
     }
 
+    public createPayment(data: CreatePaymentRequest) {
+        return this.payment.createPayment(data);
+    }
 
 }
 

@@ -98,7 +98,7 @@ export interface PaymentMethodsResponse {
         operation_id?: string;
     };
     data: PaymentMethod[];
-}
+}4
 
 export interface PaymentMethodQueryParams {
     country: string;

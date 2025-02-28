@@ -45,6 +45,8 @@ console.log(fieldRequirements);
 const paymentMethods = await client.PaymentMethodsService.getPaymentMethodsByCountry('US');
 console.log(`Found ${paymentMethods.payment_methods.length} payment methods for ${paymentMethods.country}`);
 
+//you could pick this option or choose the snippet below on how to create payment
+
 // Create a payment
 const payment = await client.createPayment({
     amount: 100,
@@ -58,15 +60,45 @@ const payment = await client.createPayment({
 ### Payments
 
 ```typescript
-// List payment methods
-const methods = await client.listPaymentMethods('US', 'USD');
 
 // Create payment
-const payment = await client.createPayment({
-    amount: 100,
-    currency: 'USD',
-    payment_method: 'us_debit_card'
+// you could use the sdk custom types in your project 
+import { RapydClient, PaymentService, CreatePaymentRequest } from 'rapyd-payments-sdk';
+
+// Initialize the client
+const rapydClient = new RapydClient({
+  accessKey: 'your-access-key',
+  secretKey: 'your-secret-key',
+  baseURL: 'https://sandboxapi.rapyd.net' // or production URL
 });
+
+const paymentService = new PaymentService(rapydClient);
+
+// Create a payment
+async function makePayment() {
+  try {
+    const paymentRequest: CreatePaymentRequest = {
+      amount: 101,
+      currency: 'USD',
+      description: 'Payment method token',
+      payment_method: 'other_7f991f72a4c14c5cd79627ebc21241de',
+      ewallets: [{
+        ewallet: 'ewallet_1290eef66d0b84ece177a3f5bd8fb0c8',
+        percentage: 100
+      }],
+      metadata: {
+        merchant_defined: true
+      }
+    };
+
+    const paymentResponse = await paymentService.createPayment(paymentRequest);
+    console.log('Payment created:', paymentResponse.data.id);
+    return paymentResponse;
+  } catch (error) {
+    console.error('Payment failed:', error);
+    throw error;
+  }
+}
 ```
 
 ### Wallets
