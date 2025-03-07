@@ -22,23 +22,6 @@ export interface PaymentMethodData {
     next_action: string;
 }
 
-// Address object
-export interface Address {
-    name?: string;
-    line_1?: string;
-    line_2?: string;
-    line_3?: string;
-    city?: string;
-    state?: string;
-    country?: string;
-    zip?: string;
-    phone_number?: string;
-    metadata?: Record<string, any>;
-    canton?: string;
-    district?: string;
-    [key: string]: any; // For additional fields
-}
-
 // Wallet in payment
 export interface PaymentWallet {
     ewallet_id: string;
@@ -176,7 +159,6 @@ export interface PaymentData {
 }
 
 
-
 // Create Payment Request Parameters
 export interface CreatePaymentRequest {
     amount: number;
@@ -211,4 +193,31 @@ export interface CreatePaymentRequest {
     initiation_type?: 'customer_present' | 'installment' | 'moto' | 'recurring' | 'unscheduled';
     client_details?: Record<string, any>;
 }
+
+export interface UpdatePaymentRequest {
+    receipt_email?: string;
+    description?: string;
+    address?: Address;
+    escrow?: boolean;
+    metadata?: Record<string, any>;
+}
+
+export interface Address {
+    name?: string;
+    line_1?: string;
+    line_2?: string;
+    line_3?: string;
+    city?: string;
+    state?: string;
+    country?: string;
+    zip?: string;
+    phone_number?: string;
+    metadata?: Record<string, any>;
+    canton?: string;
+    district?: string;
+
+    // @ts-ignore
+    [key: string]: any; // For additional fields
+}
+
 export type PaymentResponse = RapydResponse<PaymentData>;

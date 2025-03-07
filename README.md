@@ -61,7 +61,7 @@ const payment = await client.createPayment({
 
 ```typescript
 
-// Create payment
+// CREATE PAYMENT
 // you could use the sdk custom types in your project 
 import { RapydClient, PaymentService, CreatePaymentRequest } from 'rapyd-payments-sdk';
 
@@ -72,7 +72,7 @@ const rapydClient = new RapydClient({
   baseURL: 'https://sandboxapi.rapyd.net' // or production URL
 });
 
-const paymentService = new PaymentService(rapydClient);
+const paymentService = new PaymentService(rapydClient); // just call the method based of the rapydClient class
 
 // Create a payment
 async function makePayment() {
@@ -99,6 +99,36 @@ async function makePayment() {
     throw error;
   }
 }
+
+// UPDATE PAYMENT 
+
+// Update a payment using the client (which delegates to PaymentService)
+const paymentId = 'payment_36724a4ea01b438fd24ac3ab00b29150';
+
+// Method 1: Update general payment information
+await rapydClient.updatePayment(paymentId, {
+  receipt_email: 'customer@example.com',
+  description: 'Updated payment description'
+});
+
+// Method 2: Update just the address
+const address = {
+  name: 'John Doe',
+  line_1: '123 Main St',
+  city: 'Anytown',
+  country: 'US'
+};
+await rapydClient.updatePaymentAddress(paymentId, address);
+
+// Method 3: Update just metadata
+const metadata = {
+  order_id: '12345',
+  customer_type: 'premium'
+};
+await rapydClient.updatePaymentMetadata(paymentId, metadata);
+
+// Method 4: Cancel escrow
+await rapydClient.cancelEscrow(paymentId);
 ```
 
 ### Wallets
