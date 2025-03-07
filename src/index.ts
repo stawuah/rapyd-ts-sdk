@@ -1,18 +1,16 @@
 import crypto from 'crypto';
-import axios, { AxiosInstance } from 'axios';
-
-import { PaymentMethodsService , PaymentService } from './services';
-import { CreatePaymentRequest } from './types/payment';
+import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
+import { PaymentMethodsService, PaymentService } from './services';
+import {Address, CreatePaymentRequest, UpdatePaymentRequest} from './types/payment';
 
 export class RapydClient {
     protected accessKey: string;
     protected secretKey: string;
     protected baseURL: string;
     protected client: AxiosInstance;
-    
+
     private payments: PaymentMethodsService;
-    private payment : PaymentService
-    
+    private payment: PaymentService;
 
     constructor(accessKey: string, secretKey: string, baseURL = 'https://api.rapyd.net') {
         this.accessKey = accessKey;
@@ -24,7 +22,6 @@ export class RapydClient {
             headers: {
                 'Content-Type': 'application/json',
             }
-
         });
 
         this.client.interceptors.request.use(this.signRequest.bind(this));
@@ -32,27 +29,22 @@ export class RapydClient {
         // Initialize services
         this.payments = new PaymentMethodsService(accessKey, secretKey, baseURL);
         this.payment = new PaymentService(accessKey, secretKey, baseURL);
+        this.payment = new PaymentService(accessKey, secretKey, baseURL);
     }
 
     protected generateSalt(length: number = 8): string {
-        return crypto.randomBytes(Math.ceil(length / 2))
-
-            .toString('hex')
-            .slice(0, length);
+        return crypto.randomBytes(length).toString('hex').slice(0, length);
     }
 
-    protected signRequest(config: any) {
+    protected signRequest(config: InternalAxiosRequestConfig) {
         const salt = this.generateSalt();
         const timestamp = Math.floor(Date.now() / 1000);
         const httpMethod = config.method?.toUpperCase() || 'GET';
-        const path = config.url?.replace(this.baseURL, '') || '';
+        const urlPath = new URL(config.url!, this.baseURL).pathname;
         const body = config.data ? JSON.stringify(config.data) : '';
 
-        const toSign = httpMethod + path + salt + timestamp + this.accessKey + this.secretKey + body;
-        const signature = crypto
-            .createHmac('sha256', this.secretKey)
-            .update(toSign)
-            .digest('hex');
+        const toSign = `${httpMethod}${urlPath}${salt}${timestamp}${this.accessKey}${body}`;
+        const signature = crypto.createHmac('sha256', this.secretKey).update(toSign).digest('hex');
 
         config.headers['access_key'] = this.accessKey;
         config.headers['salt'] = salt;
@@ -62,7 +54,7 @@ export class RapydClient {
         return config;
     }
 
-    // Getter method to avoid initialization issues
+    // Getter methods for services
     public getFieldRequirements(paymentMethodType: string) {
         return this.payments.getFieldRequirements(paymentMethodType);
     }
@@ -75,11 +67,29 @@ export class RapydClient {
         return this.payment.createPayment(data);
     }
 
+
+    public updatePayment(paymentId: string, data: UpdatePaymentRequest): Promise<PaymentResponse> {
+        return this.payment.updatePayment(paymentId, data );
+    }
+
+    public cancelEscrow(paymentId: string): Promise<PaymentResponse> {
+        return this.payment.cancelEscrow(paymentId);
+    }
+
+    public updatePaymentAddress(paymentId: string, address : Address): Promise<PaymentResponse> {
+        return this.payment.updatePaymentAddress(paymentId, address);
+    }
+
+    public updatePaymentMetadata(paymentId: string, metadata :  Record<string, any>): Promise<PaymentResponse> {
+        return this.payment.updatePaymentMetadata(paymentId, metadata);
+    }
+
 }
 
 
 
- // public createPayment = this.payments.createPayment.bind(this.payments);
+
+// public createPayment = this.payments.createPayment.bind(this.payments);
     // public createWallet = this.wallets.createWallet.bind(this.wallets);
     // public getWalletBalance = this.wallets.getWalletBalance.bind(this.wallets);
     // public createPayout = this.payouts.createPayout.bind(this.payouts);
