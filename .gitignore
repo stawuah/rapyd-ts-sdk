@@ -45,3 +45,6 @@ temp/
 # Misc
 .cache/
 .history/
+
+CHANGELOG.md
+chat_history.txt

@@ -1,5 +1,3 @@
-// rapydErrors.ts
-
 export class RapydApiError extends Error {
     errorCode: string;
     statusCode?: number;

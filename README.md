@@ -13,11 +13,11 @@ A modern, fully-typed TypeScript SDK for the Rapyd payment platform API (unoffic
 
 🚀 Lightweight & Efficient – Optimized for performance with minimal dependencies.  
 📌 TypeScript-Powered – Enjoy strong typing, autocompletion, and better developer experience.  
-💳 Seamless Rapyd Integration** – Easily interact with Rapyd’s fintech APIs for payments, wallets, and more.  
+💳 Seamless Rapyd Integration – Easily interact with Rapyd’s fintech APIs for payments, wallets, and more.  
 🔒 Built-in Request Signing – Secure HMAC authentication is handled automatically.  
 💡 Developer-Friendly – Clean, well-structured code with intuitive service methods.  
 🛠️ Extensible – Designed for easy customization and future enhancements.  
-📄 Detailed request and response typing**  
+📄 Detailed request and response typing
 
 
 ## Installation
@@ -129,6 +129,23 @@ await rapydClient.updatePaymentMetadata(paymentId, metadata);
 
 // Method 4: Cancel escrow
 await rapydClient.cancelEscrow(paymentId);
+
+// CAPTURE PAYMENT IN FULL OR PARTIALY
+
+// Capture full payment
+rapydClient.captureFullPayment('payment_19e3edad1e9102cd24006a34c52c9a0b')
+  .then(response => console.log(response))
+  .catch(error => console.error(error));
+
+// Capture partial payment
+rapydClient.capturePayment('payment_19e3edad1e9102cd24006a34c52c9a0b', { 
+  amount: 50.00,
+  receipt_email: 'customer@example.com',
+  statement_descriptor: 'Your Store Name'
+})
+  .then(response => console.log(response))
+  .catch(error => console.error(error));
+
 ```
 
 ### Wallets
