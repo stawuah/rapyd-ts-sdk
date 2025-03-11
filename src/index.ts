@@ -1,7 +1,8 @@
 import crypto from 'crypto';
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { PaymentMethodsService, PaymentService } from './services';
-import {Address, CreatePaymentRequest, UpdatePaymentRequest} from './types/payment';
+import {Address, CreatePaymentRequest, UpdatePaymentRequest, RapydPaymentResponse as RapydPaymentResponse , RapydCapturePaymentResponse, CapturePaymentOptions, RapydLocalTransferPaymentResponse, RapydEWalletPaymentResponse, RapydCashPaymentResponse, ListPaymentsRequest, ListPaymentsResponse, ListPaymentGroupsRequest, ListPaymentGroupsResponse, ListWalletPaymentsRequest, ListWalletPaymentsResponse} from './types/payment';
+
 
 export class RapydClient {
     protected accessKey: string;
@@ -29,7 +30,6 @@ export class RapydClient {
         // Initialize services
         this.payments = new PaymentMethodsService(accessKey, secretKey, baseURL);
         this.payment = new PaymentService(accessKey, secretKey, baseURL);
-        this.payment = new PaymentService(accessKey, secretKey, baseURL);
     }
 
     protected generateSalt(length: number = 8): string {
@@ -55,6 +55,7 @@ export class RapydClient {
     }
 
     // Getter methods for services
+    // Payment Methods
     public getFieldRequirements(paymentMethodType: string) {
         return this.payments.getFieldRequirements(paymentMethodType);
     }
@@ -62,28 +63,64 @@ export class RapydClient {
     public getPaymentMethodsByCountry(countryCode: string) {
         return this.payments.getPaymentMethodsByCountry(countryCode);
     }
-
+    
+    // Payments 
     public createPayment(data: CreatePaymentRequest) {
         return this.payment.createPayment(data);
     }
 
-
-    public updatePayment(paymentId: string, data: UpdatePaymentRequest): Promise<PaymentResponse> {
+    public updatePayment(paymentId: string, data: UpdatePaymentRequest): Promise<RapydPaymentResponse> {
         return this.payment.updatePayment(paymentId, data );
     }
 
-    public cancelEscrow(paymentId: string): Promise<PaymentResponse> {
+    public cancelEscrow(paymentId: string): Promise<RapydPaymentResponse> {
         return this.payment.cancelEscrow(paymentId);
     }
 
-    public updatePaymentAddress(paymentId: string, address : Address): Promise<PaymentResponse> {
+    public updatePaymentAddress(paymentId: string, address : Address): Promise<RapydPaymentResponse> {
         return this.payment.updatePaymentAddress(paymentId, address);
     }
 
-    public updatePaymentMetadata(paymentId: string, metadata :  Record<string, any>): Promise<PaymentResponse> {
+    public updatePaymentMetadata(paymentId: string, metadata :  Record<string, any>): Promise<RapydPaymentResponse> {
         return this.payment.updatePaymentMetadata(paymentId, metadata);
     }
 
+    public captureFullPayment(paymentId: string): Promise<RapydCapturePaymentResponse> {
+        return this.payment.captureFullPayment(paymentId);
+    }
+
+    public capturePartialPayment(paymentId: string, optionalFields: CapturePaymentOptions): Promise<RapydCapturePaymentResponse> {
+        return this.payment.capturePartialPayment(paymentId, optionalFields);
+    }
+
+    public completePayment(paymentId: string, additionalParams?: { param1?: string; param2?: string }): Promise<RapydPaymentResponse> {
+        return this.payment.completePayment(paymentId , additionalParams);
+    }
+
+    public async completeBankTransferPayment(paymentToken: string, bankTransferId : string, amount : string): Promise<RapydLocalTransferPaymentResponse> {
+        return this.payment.completeBankTransferPayment(paymentToken, bankTransferId, amount);
+    }
+
+    public async completeEWalletPayment(paymentToken: string): Promise<RapydEWalletPaymentResponse> {
+        return this.payment.completeEWalletPayment(paymentToken);
+    }
+    
+
+    public async completeCashPayment(paymentToken: string): Promise<RapydCashPaymentResponse> {
+        return this.payment.completeCashPayment(paymentToken);
+    }
+
+    public async listPayments(options: ListPaymentsRequest): Promise<ListPaymentsResponse> {
+        return this.payment.listPayments(options);
+    }
+
+    public async listPaymentGroups(options: ListPaymentGroupsRequest): Promise<ListPaymentGroupsResponse> {
+        return this.payment.listPaymentGroups(options);
+    }
+
+    public async listWalletPaymentsById(options: ListWalletPaymentsRequest): Promise<ListWalletPaymentsResponse> {
+        return this.payment.listWalletPaymentsById(options);
+    }
 }
 
 

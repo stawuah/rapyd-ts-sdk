@@ -3,6 +3,11 @@ import { PaymentMethodFieldsResponse, PaymentMethodByCountryResponse, PaymentMet
 import { RapydApiError, handleApiError, formatError } from '../utils/rapyd-error'; // Import error handling module
 
 export class PaymentMethodsService extends RapydClient {
+
+     /**
+     * Fetches the required fields for a specific payment method type.
+     * Validates the response structure to ensure data integrity.
+     */
     public async getPaymentMethodRequiredFields(paymentMethodType: string): Promise<PaymentMethodFieldsResponse> {
         try {
             const response = await this.client.get(`/v1/payment_methods/required_fields/${paymentMethodType}/required_fields`);
@@ -17,6 +22,11 @@ export class PaymentMethodsService extends RapydClient {
         }
     }
 
+
+     /**
+     * Retrieves and categorizes field requirements for a given payment method.
+     * Separates required and optional fields, extracts payment options, and checks for expiration limits.
+     */
     public async getFieldRequirements(paymentMethodType: string): Promise<{
         requiredFields: RequiredField[];
         optionalFields: RequiredField[];
@@ -51,7 +61,10 @@ export class PaymentMethodsService extends RapydClient {
             handleApiError(error, `Error retrieving field requirements for ${paymentMethodType}`);
         }
     }
-
+    /**
+     * Fetches available payment methods for a given country.
+     * Validates response structure and maps data into a structured format.
+     */
     public async getPaymentMethodsByCountry(countryCode: string): Promise<PaymentMethodByCountryResponse> {
         try {
             const response = await this.client.get<PaymentMethodsResponse>(`/v1/payment_methods/countries/${countryCode}`);
