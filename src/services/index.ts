@@ -1,4 +1,5 @@
 export * from './payment-method';
 export * from './payments';
-// export * from './payouts';
-// export * from './virtual-accounts';
+export * from '../types/payment-methods';
+export * from '../types/payment'
+export * from '../utils/rapyd-error'
