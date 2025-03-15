@@ -1,22 +1,31 @@
 import crypto from 'crypto';
 import axios, { AxiosInstance, InternalAxiosRequestConfig } from 'axios';
 import { PaymentMethodsService, PaymentService } from './services';
-import {Address, CreatePaymentRequest, UpdatePaymentRequest, RapydPaymentResponse as RapydPaymentResponse , RapydCapturePaymentResponse, CapturePaymentOptions, RapydLocalTransferPaymentResponse, RapydEWalletPaymentResponse, RapydCashPaymentResponse, ListPaymentsRequest, ListPaymentsResponse, ListPaymentGroupsRequest, ListPaymentGroupsResponse, ListWalletPaymentsRequest, ListWalletPaymentsResponse} from './types/payment';
-
+import {
+    Address, CreatePaymentRequest, UpdatePaymentRequest, RapydPaymentResponse, 
+    RapydCapturePaymentResponse, CapturePaymentOptions, RapydLocalTransferPaymentResponse, RapydEWalletPaymentResponse,
+    RapydCashPaymentResponse, ListPaymentsRequest, ListPaymentsResponse, ListPaymentGroupsRequest, ListPaymentGroupsResponse, 
+    ListWalletPaymentsRequest, ListWalletPaymentsResponse
+} from './types/payment';
+import { HmacKeyManager, getActiveHmacKey } from './utils/hmac-key-manager';
 
 export class RapydClient {
     protected accessKey: string;
     protected secretKey: string;
-    protected baseURL: string;
+    protected baseURL?: string;
     protected client: AxiosInstance;
+    protected keyManager: HmacKeyManager;
+
 
     private payments: PaymentMethodsService;
     private payment: PaymentService;
+    private initialized: boolean = false;
 
     constructor(accessKey: string, secretKey: string, baseURL = 'https://api.rapyd.net') {
         this.accessKey = accessKey;
-        this.secretKey = secretKey;
+        this.secretKey = secretKey; // Initialize with provided secret key
         this.baseURL = baseURL;
+        this.keyManager = HmacKeyManager.getInstance();
 
         this.client = axios.create({
             baseURL: this.baseURL,
@@ -25,11 +34,42 @@ export class RapydClient {
             }
         });
 
-        this.client.interceptors.request.use(this.signRequest.bind(this));
+        this.client.interceptors.request.use(async (config) => {
+            // Ensure we have initialized the key manager
+            if (!this.initialized) {
+                await this.initializeKeyManager();
+            }
+            return this.signRequest(config);
+        });
 
-        // Initialize services
+
+        // Initialize services with temporary keys
+        // They will be updated after key manager initialization
         this.payments = new PaymentMethodsService(accessKey, secretKey, baseURL);
         this.payment = new PaymentService(accessKey, secretKey, baseURL);
+        
+        // Initialize key manager asynchronously
+        this.initializeKeyManager();
+    }
+
+    private async initializeKeyManager(): Promise<void> {
+        try {
+            // Get the active key for this client instance
+            const hmacKey = await getActiveHmacKey(this.accessKey);
+            this.secretKey = hmacKey;
+            
+            // Update service instances with the managed key
+            this.payments = new PaymentMethodsService(this.accessKey, this.secretKey, this.baseURL);
+            this.payment = new PaymentService(this.accessKey, this.secretKey, this.baseURL);
+            
+            // Check if key rotation is due
+            await this.keyManager.checkAndRotateIfDue(this.accessKey, 90);
+            
+            this.initialized = true;
+        } catch (error) {
+            console.error('Failed to initialize HMAC key manager:', error);
+            // Continue with the provided secret key as fallback implementation this
+        }
     }
 
     protected generateSalt(length: number = 8): string {
@@ -37,13 +77,14 @@ export class RapydClient {
     }
 
     protected signRequest(config: InternalAxiosRequestConfig) {
+
         const salt = this.generateSalt();
         const timestamp = Math.floor(Date.now() / 1000);
         const httpMethod = config.method?.toUpperCase() || 'GET';
-        const urlPath = new URL(config.url!, this.baseURL).pathname;
+        const requestPath = new URL(config.url!, this.baseURL).pathname;
         const body = config.data ? JSON.stringify(config.data) : '';
 
-        const toSign = `${httpMethod}${urlPath}${salt}${timestamp}${this.accessKey}${body}`;
+        const toSign = `${httpMethod}${requestPath}${salt}${timestamp}${this.accessKey}${this.secretKey}${body}`;
         const signature = crypto.createHmac('sha256', this.secretKey).update(toSign).digest('hex');
 
         config.headers['access_key'] = this.accessKey;
@@ -122,39 +163,3 @@ export class RapydClient {
         return this.payment.listWalletPaymentsById(options);
     }
 }
-
-
-
-
-// public createPayment = this.payments.createPayment.bind(this.payments);
-    // public createWallet = this.wallets.createWallet.bind(this.wallets);
-    // public getWalletBalance = this.wallets.getWalletBalance.bind(this.wallets);
-    // public createPayout = this.payouts.createPayout.bind(this.payouts);
-    // public createVirtualAccount = this.virtualAccounts.createVirtualAccount.bind(this.virtualAccounts);
-    // Payment Methods
-    // public async listPaymentMethods(country: string, currency: string) {
-    //     return this.client.get(`/v1/payment_methods/country?country=${country}&currency=${currency}`);
-    // }
-
-    // public async createPayment(data: PaymentRequest) {
-    //     return this.client.post('/v1/payments', data);
-    // }
-
-    // // Wallets
-    // public async createWallet(data: WalletRequest) {
-    //     return this.client.post('/v1/user/wallets', data);
-    // }
-
-    // public async getWalletBalance(walletId: string) {
-    //     return this.client.get(`/v1/user/wallets/${walletId}`);
-    // }
-
-    // // Payouts
-    // public async createPayout(data: PayoutRequest) {
-    //     return this.client.post('/v1/payouts', data);
-    // }
-
-    // // Virtual Accounts
-    // public async createVirtualAccount(data: VirtualAccountRequest) {
-    //     return this.client.post('/v1/virtual_accounts', data);
-    // }
